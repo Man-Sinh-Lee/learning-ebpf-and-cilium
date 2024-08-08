@@ -1,0 +1,19 @@
+---
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  extraPortMappings:
+  # nodepinger
+  - containerPort: 32042
+    hostPort: 32042
+  # goldpinger
+  - containerPort: 32043
+    hostPort: 32043
+- role: worker
+- role: worker
+- role: worker
+- role: worker
+networking:
+  disableDefaultCNI: true
+  podSubnet: 192.168.0.0/16

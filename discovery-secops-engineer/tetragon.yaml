@@ -1,0 +1,14 @@
+tetragon:
+  btf: /sys/kernel/btf/vmlinux
+  enableCiliumAPI: false
+  exportAllowList: ""
+  exportDenyList: ""
+  exportFilename: "tetragon.log"
+  enableProcessCred: true
+  enableProcessNs: true
+  # This gives a two hour retention
+  # as this lab produces ~6.7MB of logs per minute
+  exportFileMaxSizeMB: 20
+  exportFileMaxBackups: 40
+tetragonOperator:
+  enabled: true

@@ -1,0 +1,29 @@
+name: bgp-cplane-devel
+topology:
+  kinds:
+    linux:
+      cmd: bash
+  nodes:
+    tor:
+      kind: linux
+      image: frrouting/frr:v8.2.2
+      exec:
+        # peer over this link with cilium
+        - ip addr add 172.0.0.1/24 dev net0
+        # Boiler plate to make FRR work
+        - touch /etc/frr/vtysh.conf
+        - touch /var/log/frr.log
+        - chown frr:frr /var/log/frr.log
+        - sed -i -e 's/bgpd=no/bgpd=yes/g' /etc/frr/daemons
+        - /usr/lib/frr/frrinit.sh start
+        - >-
+          vtysh -c 'conf t' -c 'log file /var/log/frr.log' -c 'debug bgp neighbor-events' -c 'debug bgp updates' -c 'debug bgp zebra' -c '! peer with Cilium' -c 'router bgp 65000' -c ' no bgp ebgp-requires-policy'     -c ' bgp router-id 172.0.0.1' -c ' neighbor 172.0.0.2 remote-as 65001' -c ' address-family ipv6 unicast' -c '  neighbor 172.0.0.2  activate' -c ' exit-address-family' -c '!'
+    cilium:
+      kind: linux
+      image: nicolaka/netshoot:latest
+      network-mode: container:clab-bgp-cplane-devel-control-plane
+      exec:
+        # peer over this link with tor
+        - ip addr add 172.0.0.2/24 dev net0
+  links:
+    - endpoints: ["tor:net0", "cilium:net0"]

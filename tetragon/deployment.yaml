@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sith-infiltrator
+  labels:
+    org: empire
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sith-infiltrator
+  template:
+    metadata:
+      labels:
+        app: sith-infiltrator
+        org: empire
+    spec:
+      hostPID: true
+      hostNetwork: true
+      containers:
+      - name: sith-infiltrator
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        securityContext:
+          privileged: true

@@ -1,0 +1,502 @@
+---
+# Source: tetragon/templates/operator_serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tetragon-operator-service-account
+  namespace: tetragon
+  labels:
+    helm.sh/chart: tetragon-1.13.1
+    app.kubernetes.io/name: "tetragon-operator"
+    app.kubernetes.io/instance: tetragon
+    app.kubernetes.io/version: "1.13.1"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: tetragon/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tetragon
+  namespace: tetragon
+  labels:
+    helm.sh/chart: tetragon-1.13.1
+    app.kubernetes.io/name: tetragon
+    app.kubernetes.io/instance: tetragon
+    app.kubernetes.io/version: "1.13.1"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: tetragon/templates/operator_configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tetragon-operator-config
+  namespace: tetragon
+  labels:
+    helm.sh/chart: tetragon-1.13.1
+    app.kubernetes.io/name: "tetragon-operator"
+    app.kubernetes.io/instance: tetragon
+    app.kubernetes.io/version: "1.13.1"
+    app.kubernetes.io/managed-by: Helm
+data:
+  skip-crd-creation: "false"
+  skip-pod-info-crd: "false"
+  skip-tracing-policy-crd: "false"
+  skip-policysandbox-crd: "false"
+---
+# Source: tetragon/templates/tetragon_configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tetragon-config
+  namespace: tetragon
+  labels:
+    helm.sh/chart: tetragon-1.13.1
+    app.kubernetes.io/name: tetragon
+    app.kubernetes.io/instance: tetragon
+    app.kubernetes.io/version: "1.13.1"
+    app.kubernetes.io/managed-by: Helm
+data:
+  procfs: /procRoot
+  enable-process-cred: "false"
+  enable-process-ns: "false"
+  process-cache-size: "65536"
+  export-filename: /var/run/cilium/hubble/tetragon.log
+  export-file-perm: "644"
+  export-file-max-size-mb: "10"
+  export-file-max-backups: "5"
+  export-file-compress: "false"
+  export-allowlist: |-
+    
+  export-denylist: |-
+    
+  field-filters: |-
+    
+  redaction-filters: |-
+    
+  export-rate-limit: "-1"
+  enable-k8s-api: "true"
+  metrics-server: :2112
+  metrics-label-filter: namespace,workload,pod,binary
+  server-address: localhost:54321
+  health-server-address: :6789
+  health-server-interval: "10"
+  gops-address: localhost:8118
+  enable-pod-info: "true"
+  enable-tracing-policy-crd: "true"
+  fim-runtime-endpoint: ""
+  fim-fifo-path: "/var/run/cilium/hubble"
+  flow-export-filename: /var/run/cilium/hubble/tetragon-flows.log
+  flow-export-file-max-size-mb: "10"
+  flow-export-file-max-backups: "5"
+  flow-export-file-compress: "false"
+  enable-sandboxpolicies: "true"
+---
+# Source: tetragon/templates/clusterrole.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: tetragon
+  labels:
+    helm.sh/chart: tetragon-1.13.1
+    app.kubernetes.io/name: tetragon
+    app.kubernetes.io/instance: tetragon
+    app.kubernetes.io/version: "1.13.1"
+    app.kubernetes.io/managed-by: Helm
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - cilium.io
+    resources:
+      - podinfo
+      - tracingpolicies
+      - tracingpoliciesnamespaced
+      - sandboxpolicies
+      - sandboxpoliciesnamespaced
+    verbs:
+      - get
+      - list
+      - watch
+  # We need to split out the create permission and enforce it without resourceNames since
+  # the name would not be known at resource creation time
+  - apiGroups:
+      - apiextensions.k8s.io
+    resources:
+      - customresourcedefinitions
+    verbs:
+      - get
+      - list
+      - watch
+---
+# Source: tetragon/templates/operator_clusterrole.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: tetragon-operator
+  labels:
+    helm.sh/chart: tetragon-1.13.1
+    app.kubernetes.io/name: "tetragon-operator"
+    app.kubernetes.io/instance: tetragon
+    app.kubernetes.io/version: "1.13.1"
+    app.kubernetes.io/managed-by: Helm
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - cilium.io
+    resources:
+      - podinfo
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - apiextensions.k8s.io
+    resources:
+      - customresourcedefinitions
+    verbs:
+      - create
+  - apiGroups:
+      - apiextensions.k8s.io
+    resources:
+      - customresourcedefinitions
+    resourceNames:
+      - tracingpolicies.cilium.io
+      - tracingpoliciesnamespaced.cilium.io
+      - podinfo.cilium.io
+      - sandboxpolicies.cilium.io
+      - sandboxpoliciesnamespaced.cilium.io
+    verbs:
+      - update
+      - get
+      - list
+      - watch
+---
+# Source: tetragon/templates/clusterrolebinding.yml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: tetragon
+  labels:
+    helm.sh/chart: tetragon-1.13.1
+    app.kubernetes.io/name: tetragon
+    app.kubernetes.io/instance: tetragon
+    app.kubernetes.io/version: "1.13.1"
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: tetragon
+subjects:
+  - kind: ServiceAccount
+    namespace: tetragon
+    name: tetragon
+---
+# Source: tetragon/templates/operator_clusterrolebinding.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: tetragon-operator-rolebinding
+  labels:
+    helm.sh/chart: tetragon-1.13.1
+    app.kubernetes.io/name: "tetragon-operator"
+    app.kubernetes.io/instance: tetragon
+    app.kubernetes.io/version: "1.13.1"
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: tetragon-operator
+subjects:
+  - kind: ServiceAccount
+    namespace: tetragon
+    name: tetragon-operator-service-account
+---
+# Source: tetragon/templates/operator_service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: tetragon
+  name: tetragon-operator-metrics
+  labels:
+    helm.sh/chart: tetragon-1.13.1
+    app.kubernetes.io/name: "tetragon-operator"
+    app.kubernetes.io/instance: tetragon
+    app.kubernetes.io/version: "1.13.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  ports:
+    - name: metrics
+      port: 2113
+      targetPort: 2113
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: "tetragon-operator"
+    app.kubernetes.io/instance: tetragon
+  type: ClusterIP
+---
+# Source: tetragon/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    helm.sh/chart: tetragon-1.13.1
+    app.kubernetes.io/name: tetragon
+    app.kubernetes.io/instance: tetragon
+    app.kubernetes.io/version: "1.13.1"
+    app.kubernetes.io/managed-by: Helm
+  name: tetragon
+  namespace: tetragon
+spec:
+  ports:
+    - name: metrics
+      port: 2112
+      protocol: TCP
+      targetPort: 2112
+  selector:
+    helm.sh/chart: tetragon-1.13.1
+    app.kubernetes.io/name: tetragon
+    app.kubernetes.io/instance: tetragon
+    app.kubernetes.io/version: "1.13.1"
+    app.kubernetes.io/managed-by: Helm
+  type: ClusterIP
+---
+# Source: tetragon/templates/daemonset.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    helm.sh/chart: tetragon-1.13.1
+    app.kubernetes.io/name: tetragon
+    app.kubernetes.io/instance: tetragon
+    app.kubernetes.io/version: "1.13.1"
+    app.kubernetes.io/managed-by: Helm
+  name: tetragon
+  namespace: tetragon
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tetragon
+      app.kubernetes.io/instance: tetragon
+  template:
+    metadata:
+      annotations:
+        checksum/configmap: 09494f155d14c6e5e1189e0d5900094408d1a3888173a1f891584b15c12ba81a
+      labels:
+        helm.sh/chart: tetragon-1.13.1
+        app.kubernetes.io/name: tetragon
+        app.kubernetes.io/instance: tetragon
+        app.kubernetes.io/version: "1.13.1"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      serviceAccountName: tetragon
+      initContainers:
+      
+      containers:
+      - name: export-stdout
+        image: "quay.io/isovalent/hubble-export-stdout:v1.0.4"
+        imagePullPolicy: IfNotPresent
+        terminationMessagePolicy: FallbackToLogsOnError
+        env:
+          []
+        securityContext:
+          {}
+        resources:
+          null
+        command:
+          - hubble-export-stdout
+        args:
+          - /var/run/cilium/hubble/tetragon.log
+        volumeMounts:
+          - name: export-logs
+            mountPath: /var/run/cilium/hubble
+      - name: tetragon
+        securityContext:
+          privileged: true
+        image: "quay.io/isovalent/tetragon:v1.13.1"
+        imagePullPolicy: IfNotPresent
+        terminationMessagePolicy: FallbackToLogsOnError
+        args:
+          - --config-dir=/etc/tetragon/tetragon.conf.d/
+          - --detach-old-bpf=true
+          - --rb-size=98304
+          - --release-pinned-bpf=true
+          - --verbose=3
+        volumeMounts:
+          - mountPath: /etc/tetragon/tetragon.conf.d/
+            name: tetragon-config
+            readOnly: true
+          - mountPath: /sys/fs/bpf
+            mountPropagation: Bidirectional
+            name: bpf-maps
+          - mountPath: "/var/run/cilium"
+            name: cilium-run
+          - mountPath: /var/run/cilium/hubble
+            name: export-logs
+          - mountPath: "/procRoot"
+            name: host-proc
+          
+        env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                  fieldPath: spec.nodeName
+        livenessProbe:
+           timeoutSeconds: 60
+           grpc:
+            port: 6789
+            service: "liveness"
+      tolerations:
+        - operator: Exists
+      hostNetwork: true
+      dnsPolicy: Default
+      terminationGracePeriodSeconds: 1
+      volumes:
+      - name: cilium-run
+        hostPath:
+          path: /var/run/cilium
+          type: DirectoryOrCreate
+      - name: export-logs
+        hostPath:
+          path: /var/run/cilium/hubble
+          type: DirectoryOrCreate
+      - name: tetragon-config
+        configMap:
+          name: tetragon-config
+      - name: bpf-maps
+        hostPath:
+          path: /sys/fs/bpf
+          type: DirectoryOrCreate
+      - name: host-proc
+        hostPath:
+          path: /proc
+          type: Directory
+---
+# Source: tetragon/templates/operator_deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    helm.sh/chart: tetragon-1.13.1
+    app.kubernetes.io/name: "tetragon-operator"
+    app.kubernetes.io/instance: tetragon
+    app.kubernetes.io/version: "1.13.1"
+    app.kubernetes.io/managed-by: Helm
+  name: tetragon-operator
+  namespace: tetragon
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "tetragon-operator"
+      app.kubernetes.io/instance: tetragon
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: tetragon-1.13.1
+        app.kubernetes.io/name: "tetragon-operator"
+        app.kubernetes.io/instance: tetragon
+        app.kubernetes.io/version: "1.13.1"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      containers:
+      - name: tetragon-operator
+        command:
+          - /usr/bin/tetragon-operator
+        args:
+          - serve
+          - --config-dir=/etc/tetragon/operator.conf.d/
+          - --metrics-bind-address=:2113
+        image: "quay.io/isovalent/tetragon-operator:v1.13.1"
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - mountPath: /etc/tetragon/operator.conf.d/
+            name: tetragon-operator-config
+            readOnly: true
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        ports:
+          - name: metrics
+            containerPort: 2113
+            protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 64Mi
+      tolerations:
+        - operator: Exists
+      serviceAccountName: tetragon-operator-service-account
+      terminationGracePeriodSeconds: 10
+      volumes:
+        - name: tetragon-operator-config
+          configMap:
+            name: tetragon-operator-config
+---
+# Source: tetragon/templates/servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    helm.sh/chart: tetragon-1.13.1
+    app.kubernetes.io/name: tetragon
+    app.kubernetes.io/instance: tetragon
+    app.kubernetes.io/version: "1.13.1"
+    app.kubernetes.io/managed-by: Helm
+  name: tetragon
+  namespace: tetragon
+spec:
+  endpoints:
+    - honorLabels: true
+      interval: 10s
+      path: /metrics
+      port: metrics
+      relabelings:
+        - replacement: ${1}
+          sourceLabels:
+            - __meta_kubernetes_pod_node_name
+          targetLabel: node
+  namespaceSelector:
+    matchNames:
+      - tetragon
+  selector:
+    matchLabels:
+      helm.sh/chart: tetragon-1.13.1
+      app.kubernetes.io/name: tetragon
+      app.kubernetes.io/instance: tetragon
+      app.kubernetes.io/version: "1.13.1"
+      app.kubernetes.io/managed-by: Helm

@@ -1,0 +1,11 @@
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: "default-deny"
+spec:
+  description: "Block all unknown traffic to nodes"
+  nodeSelector: {}
+  ingress:
+  - fromEntities:
+    - cluster

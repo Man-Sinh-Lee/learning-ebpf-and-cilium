@@ -1,0 +1,19 @@
+apiVersion: isovalent.com/v1
+kind: IsovalentEgressGatewayPolicy
+metadata:
+  name: outpost-ha
+spec:
+  azAffinity: localOnlyFirst
+  destinationCIDRs:
+  - "172.18.0.0/16"
+  selectors:
+  - podSelector:
+      matchLabels:
+        org: alliance
+  egressGroups:
+    - nodeSelector:
+        matchLabels:
+          egress-gw: 'true'
+      interface: net0
+
+kubectl apply -f egress-gw-policy-ha.yaml

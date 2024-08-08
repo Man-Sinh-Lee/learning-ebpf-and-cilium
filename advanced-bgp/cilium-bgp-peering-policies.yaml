@@ -1,0 +1,18 @@
+---
+apiVersion: "cilium.io/v2alpha1"
+kind: CiliumBGPPeeringPolicy
+metadata:
+  name: tor
+spec:
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/hostname: clab-bgp-cplane-devel-control-plane
+  virtualRouters:
+  - localASN: 65001
+    exportPodCIDR: true
+    neighbors:
+    - peerAddress: "172.0.0.1/32"
+      peerASN: 65000
+      #connectRetryTimeSeconds: 12
+      #holdTimeSeconds: 9
+      #keepAliveTimeSeconds: 3

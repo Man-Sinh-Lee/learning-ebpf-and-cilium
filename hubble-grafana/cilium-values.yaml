@@ -1,0 +1,51 @@
+kubeProxyReplacement: true
+k8sServiceHost: kind-control-plane
+k8sServicePort: 6443
+
+operator:
+  # only 1 replica needed on a single node setup
+  replicas: 1
+  prometheus:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+hubble:
+  relay:
+    # enable relay in 02
+    # enabled: true
+    service:
+      type: NodePort
+    prometheus:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+
+  metrics:
+    serviceMonitor:
+      enabled: true
+    enableOpenMetrics: true
+    enabled:
+      - dns
+      - drop
+      - tcp
+      - icmp
+      - "flow:sourceContext=workload-name|reserved-identity;destinationContext=workload-name|reserved-identity"
+      - "kafka:labelsContext=source_namespace,source_workload,destination_namespace,destination_workload,traffic_direction;sourceContext=workload-name|reserved-identity;destinationContext=workload-name|reserved-identity"
+      - "httpV2:exemplars=true;labelsContext=source_ip,source_namespace,source_workload,destination_ip,destination_namespace,destination_workload,traffic_direction;sourceContext=workload-name|reserved-identity;destinationContext=workload-name|reserved-identity"
+    dashboards:
+      enabled: true
+      namespace: monitoring
+      annotations:
+        grafana_folder: "Hubble"
+
+  ui:
+    # enable UI in 02
+    # enabled: true
+    service:
+      type: NodePort
+
+prometheus:
+  enabled: true
+  serviceMonitor:
+    enabled: true

@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rebel-base
+spec:
+  selector:
+    matchLabels:
+      name: rebel-base
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: rebel-base
+    spec:
+      containers:
+      - name: rebel-base
+        image: nicolaka/netshoot:latest
+        imagePullPolicy: Always
+        command: ["sleep", "infinite"]
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deathstar
+spec:
+  selector:
+    matchLabels:
+      name: deathstar
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: deathstar
+    spec:
+      containers:
+      - name: deathstar
+        image: nicolaka/netshoot:latest
+        imagePullPolicy: Always
+        command: ["sleep", "infinite"]
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN

@@ -1,0 +1,136 @@
+---
+# Source: hubble-k8s-exporter/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: hubble-k8s-exporter
+  labels:
+    helm.sh/chart: hubble-k8s-exporter-1.0.4
+    app.kubernetes.io/name: hubble-k8s-exporter
+    app.kubernetes.io/instance: hubble-k8s-exporter
+    app.kubernetes.io/version: "1.0.4"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: hubble-k8s-exporter/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hubble-k8s-exporter
+  labels:
+    helm.sh/chart: hubble-k8s-exporter-1.0.4
+    app.kubernetes.io/name: hubble-k8s-exporter
+    app.kubernetes.io/instance: hubble-k8s-exporter
+    app.kubernetes.io/version: "1.0.4"
+    app.kubernetes.io/managed-by: Helm
+data:
+  config.yaml: |
+    debug: false
+    export-file-path: /var/run/cilium/hubble/k8s-events.log
+    export-file-max-size: "50"
+    export-file-rotation-interval: "0"
+    export-file-max-backups: "3"
+    export-file-compress: "true"
+    export-cluster-name: ""
+    export-k8s-endpoints: false
+---
+# Source: hubble-k8s-exporter/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: hubble-k8s-exporter
+  labels:
+    helm.sh/chart: hubble-k8s-exporter-1.0.4
+    app.kubernetes.io/name: hubble-k8s-exporter
+    app.kubernetes.io/instance: hubble-k8s-exporter
+    app.kubernetes.io/version: "1.0.4"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - networkpolicies
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - cilium.io
+  resources:
+  - ciliumnetworkpolicies
+  - ciliumclusterwidenetworkpolicies
+  verbs:
+  - get
+  - list
+  - watch
+---
+# Source: hubble-k8s-exporter/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: hubble-k8s-exporter
+  labels:
+    helm.sh/chart: hubble-k8s-exporter-1.0.4
+    app.kubernetes.io/name: hubble-k8s-exporter
+    app.kubernetes.io/instance: hubble-k8s-exporter
+    app.kubernetes.io/version: "1.0.4"
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: hubble-k8s-exporter
+subjects:
+- kind: ServiceAccount
+  name: hubble-k8s-exporter
+  namespace: hubble-k8s-exporter
+---
+# Source: hubble-k8s-exporter/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hubble-k8s-exporter
+  labels:
+    helm.sh/chart: hubble-k8s-exporter-1.0.4
+    app.kubernetes.io/name: hubble-k8s-exporter
+    app.kubernetes.io/instance: hubble-k8s-exporter
+    app.kubernetes.io/version: "1.0.4"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hubble-k8s-exporter
+      app.kubernetes.io/instance: hubble-k8s-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hubble-k8s-exporter
+        app.kubernetes.io/instance: hubble-k8s-exporter
+    spec:
+      serviceAccountName: hubble-k8s-exporter
+      securityContext:
+        {}
+      containers:
+        - name: hubble-k8s-exporter
+          securityContext:
+            {}
+          image: "quay.io/isovalent/hubble-k8s-exporter:v1.0.4"
+          imagePullPolicy: IfNotPresent
+          resources:
+            {}
+          volumeMounts:
+            - mountPath: "/etc/hubble-k8s-exporter"
+              name: config
+              readOnly: true
+            - mountPath: /var/run/cilium
+              name: cilium-run
+      volumes:
+        - name: config
+          configMap:
+            name: hubble-k8s-exporter
+            items:
+            - key: config.yaml
+              path: config.yaml
+        - name: cilium-run
+          hostPath:
+            path: /var/run/cilium
+            type: DirectoryOrCreate

@@ -1,0 +1,31 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: tiefighter
+  namespace: endor
+spec:
+  endpointSelector:
+    matchLabels:
+      org: empire
+      class: tiefighter
+  egress:
+    - toFQDNs:
+        - matchName: disney.com
+      toPorts:
+        - ports:
+            - port: "443"
+    - toFQDNs:
+        - matchName: swapi.dev
+      toPorts:
+        - ports:
+            - port: "443"
+    - toEndpoints:
+        - matchLabels:
+            k8s:app.kubernetes.io/name: deathstar
+            k8s:class: deathstar
+            k8s:io.cilium.k8s.namespace.labels.kubernetes.io/metadata.name: endor
+            k8s:io.kubernetes.pod.namespace: endor
+            k8s:org: empire
+      toPorts:
+        - ports:
+            - port: "80"

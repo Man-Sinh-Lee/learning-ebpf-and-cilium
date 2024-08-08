@@ -1,0 +1,30 @@
+apiVersion: isovalent.com/v1alpha1
+kind: IsovalentMulticastGroup
+metadata:
+  name: empire
+  namespace: default
+spec:
+  groupAddrs:
+    - "225.0.0.10"
+    - "225.0.0.11"
+    - "225.0.0.12"
+---
+apiVersion: isovalent.com/v1alpha1
+kind: IsovalentMulticastGroup
+metadata:
+  name: alliance
+  namespace: default
+spec:
+  groupAddrs:
+    - "225.0.0.20"
+    - "225.0.0.21"
+    - "225.0.0.22"
+---
+apiVersion: isovalent.com/v1alpha1
+kind: IsovalentMulticastGroup
+metadata:
+  name: the-force
+  namespace: default
+spec:
+  groupAddrs:
+    - "225.0.0.42"

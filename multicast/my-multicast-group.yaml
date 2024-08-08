@@ -1,0 +1,35 @@
+# my-multicast-group.yaml
+apiVersion: isovalent.com/v1alpha1
+kind: IsovalentMulticastGroup
+metadata:
+  name: my-multicast-group
+  namespace: default
+spec:
+  groupAddrs:
+    - "225.0.0.50"
+---
+# multicast-listener.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: multicast-listener
+  namespace: default
+spec:
+  containers:
+  - name: listener
+    image: byrnedo/alpine-curl
+    command: ["sh", "-c", "apk add --no-cache py-pip && pip install multicast && python -c 'import socket, struct; s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP); s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1); s.bind(('', 1234)); mreq=struct.pack('4sl', socket.inet_aton(\"225.0.0.50\"), socket.INADDR_ANY); s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq); while True: print(s.recv(1024))'"]
+    ports:
+    - containerPort: 1234
+---
+# multicast-sender.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: multicast-sender
+  namespace: default
+spec:
+  containers:
+  - name: sender
+    image: byrnedo/alpine-curl
+    command: ["sh", "-c", "apk add --no-cache py-pip && pip install multicast && python -c 'import socket; s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP); s.sendto(b\"Hello Multicast\", (\"225.0.0.50\", 1234))'"]

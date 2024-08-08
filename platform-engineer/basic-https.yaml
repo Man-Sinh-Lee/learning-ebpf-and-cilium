@@ -1,0 +1,33 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: Gateway
+metadata:
+  name: tls-gateway
+spec:
+  gatewayClassName: cilium
+  listeners:
+  - name: deathstar
+    protocol: HTTPS
+    port: 443
+    hostname: "deathstar.cilium.rocks"
+    tls:
+      certificateRefs:
+      - kind: Secret
+        name: cilium-rocks
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: deathstar
+spec:
+  parentRefs:
+  - name: tls-gateway
+  hostnames:
+  - "deathstar.cilium.rocks"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: deathstar
+      port: 80

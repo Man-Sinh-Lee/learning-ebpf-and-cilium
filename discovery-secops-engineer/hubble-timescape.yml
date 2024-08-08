@@ -1,0 +1,743 @@
+---
+# Source: hubble-timescape/templates/ingester_serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "hubble-timescape-ingester"
+  namespace: hubble-timescape
+  labels:
+    helm.sh/chart: hubble-timescape-1.3.2
+    app.kubernetes.io/name: hubble-timescape-ingester
+    app.kubernetes.io/instance: hubble-timescape-ingester-hubble-timescape
+    app.kubernetes.io/component: ingester
+    app.kubernetes.io/part-of: hubble-timescape
+    app.kubernetes.io/version: "1.3.2"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: hubble-timescape/templates/server_serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "hubble-timescape-server"
+  namespace: hubble-timescape
+  labels:
+    helm.sh/chart: hubble-timescape-1.3.2
+    app.kubernetes.io/name: hubble-timescape-server
+    app.kubernetes.io/instance: hubble-timescape-server-hubble-timescape
+    app.kubernetes.io/component: server
+    app.kubernetes.io/part-of: hubble-timescape
+    app.kubernetes.io/version: "1.3.2"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: hubble-timescape/templates/clickhouse_client_configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "hubble-timescape-clickhouse-client-config"
+  namespace: hubble-timescape
+  labels:
+    helm.sh/chart: hubble-timescape-1.3.2
+    app.kubernetes.io/name: hubble-timescape-clickhouse
+    app.kubernetes.io/instance: hubble-timescape-clickhouse-hubble-timescape
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: hubble-timescape
+    app.kubernetes.io/version: "1.3.2"
+    app.kubernetes.io/managed-by: Helm
+data:
+  config.xml: |
+    <config>
+    </config>
+---
+# Source: hubble-timescape/templates/ingester_configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hubble-timescape-ingester-config
+  namespace: hubble-timescape
+  labels:
+    helm.sh/chart: hubble-timescape-1.3.2
+    app.kubernetes.io/name: hubble-timescape-ingester
+    app.kubernetes.io/instance: hubble-timescape-ingester-hubble-timescape
+    app.kubernetes.io/component: ingester
+    app.kubernetes.io/part-of: hubble-timescape
+    app.kubernetes.io/version: "1.3.2"
+    app.kubernetes.io/managed-by: Helm
+data:
+  config.yaml: |
+    debug: false
+    pprof: true
+    pprof-address: "localhost"
+    pprof-port: 6060
+    gops: true
+    gops-port: 9898
+    batch-size: 10000
+    list-objects-timeout: 1m
+    bucket-uri: "s3://timescape/hubble-events?endpoint=http://minio.minio.svc.cluster.local:80&s3ForcePathStyle=true"
+    buckets: 
+      []
+    bucket-pattern: "%Y/%m/%d/"
+    cluster-name: ""
+    enable-flows-ingestion: true
+    flows-pattern: 
+    enable-fgs-events-ingestion: true
+    fgs-pattern: 
+    enable-k8s-events-ingestion: true
+    k8s-pattern: 
+    report-interval: 1s
+    schedule-interval: 5s
+    flows-ttl: 336h0m0s
+    fgs-ttl: 336h0m0s
+    k8s-ttl: 336h0m0s
+    prometheus-serve-addr: ":9090"
+    use-distributed-tables: false
+---
+# Source: hubble-timescape/templates/migrate_configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hubble-timescape-migrate-config
+  namespace: hubble-timescape
+  labels:
+    helm.sh/chart: hubble-timescape-1.3.2
+    app.kubernetes.io/name: hubble-timescape-migrate
+    app.kubernetes.io/instance: hubble-timescape-migrate-hubble-timescape
+    app.kubernetes.io/component: ingester
+    app.kubernetes.io/part-of: hubble-timescape
+    app.kubernetes.io/version: "1.3.2"
+    app.kubernetes.io/managed-by: Helm
+data:
+  config.yaml: |
+    debug: false
+    pprof: true
+    pprof-address: "localhost"
+    pprof-port: 6060
+    gops: true
+    gops-port: 9898
+    flows-ttl: 336h0m0s
+    fgs-ttl: 336h0m0s
+    k8s-ttl: 336h0m0s
+    use-distributed-tables: false
+    use-distributed-ddl: false
+    clickhouse-storage-mode: ""
+---
+# Source: hubble-timescape/templates/server_configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hubble-timescape-server-config
+  namespace: hubble-timescape
+  labels:
+    helm.sh/chart: hubble-timescape-1.3.2
+    app.kubernetes.io/name: hubble-timescape-server
+    app.kubernetes.io/instance: hubble-timescape-server-hubble-timescape
+    app.kubernetes.io/component: server
+    app.kubernetes.io/part-of: hubble-timescape
+    app.kubernetes.io/version: "1.3.2"
+    app.kubernetes.io/managed-by: Helm
+data:
+  config.yaml: |
+    debug: false
+    listen-address: :4244
+    prometheus-serve-addr: ":9090"
+    pprof: true
+    pprof-address: "localhost"
+    pprof-port: 6060
+    gops: true
+    gops-port: 9898
+    enable-tls: false
+    use-distributed-tables: false
+    log-query-progress: "false"
+    enable-clickhouse-server-logs: "false"
+    enable-experimental-api: false
+    enable-tracing: false
+    log-traces: false
+    otlp-enabled: false
+    otlp-endpoint: 
+    otlp-transport: "grpc"
+    otlp-secure: "true"
+    otlp-url-path:
+---
+# Source: hubble-timescape/templates/ingester_metrics_service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: hubble-timescape-ingester-metrics
+  namespace: hubble-timescape
+  labels:
+    helm.sh/chart: hubble-timescape-1.3.2
+    app.kubernetes.io/name: hubble-timescape-ingester
+    app.kubernetes.io/instance: hubble-timescape-ingester-hubble-timescape
+    app.kubernetes.io/component: ingester
+    app.kubernetes.io/part-of: hubble-timescape
+    app.kubernetes.io/version: "1.3.2"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+spec:
+  clusterIP: None
+  type: ClusterIP
+  ports:
+  - name: metrics
+    port: 9090
+    targetPort: ingest-metrics
+    protocol: TCP
+  selector:
+      app.kubernetes.io/name: hubble-timescape-ingester
+      app.kubernetes.io/instance: hubble-timescape-ingester-hubble-timescape
+      app.kubernetes.io/component: ingester
+      app.kubernetes.io/part-of: hubble-timescape
+---
+# Source: hubble-timescape/templates/server_metrics_service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: hubble-timescape-server-metrics
+  namespace: hubble-timescape
+  labels:
+    helm.sh/chart: hubble-timescape-1.3.2
+    app.kubernetes.io/name: hubble-timescape-server
+    app.kubernetes.io/instance: hubble-timescape-server-hubble-timescape
+    app.kubernetes.io/component: server
+    app.kubernetes.io/part-of: hubble-timescape
+    app.kubernetes.io/version: "1.3.2"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+spec:
+  clusterIP: None
+  type: ClusterIP
+  ports:
+  - name: metrics
+    port: 9090
+    targetPort: server-metrics
+    protocol: TCP
+  selector:
+      app.kubernetes.io/name: hubble-timescape-server
+      app.kubernetes.io/instance: hubble-timescape-server-hubble-timescape
+      app.kubernetes.io/component: server
+      app.kubernetes.io/part-of: hubble-timescape
+---
+# Source: hubble-timescape/templates/server_service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: hubble-timescape
+  namespace: hubble-timescape
+  labels:
+    helm.sh/chart: hubble-timescape-1.3.2
+    app.kubernetes.io/name: hubble-timescape-server
+    app.kubernetes.io/instance: hubble-timescape-server-hubble-timescape
+    app.kubernetes.io/component: server
+    app.kubernetes.io/part-of: hubble-timescape
+    app.kubernetes.io/version: "1.3.2"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      name: grpc
+      port: 80
+      targetPort: server-grpc
+  selector:
+    app.kubernetes.io/name: hubble-timescape-server
+    app.kubernetes.io/instance: hubble-timescape-server-hubble-timescape
+    app.kubernetes.io/component: server
+    app.kubernetes.io/part-of: hubble-timescape
+---
+# Source: hubble-timescape/templates/ingester_deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hubble-timescape-ingester
+  namespace: hubble-timescape
+  labels:
+    helm.sh/chart: hubble-timescape-1.3.2
+    app.kubernetes.io/name: hubble-timescape-ingester
+    app.kubernetes.io/instance: hubble-timescape-ingester-hubble-timescape
+    app.kubernetes.io/component: ingester
+    app.kubernetes.io/part-of: hubble-timescape
+    app.kubernetes.io/version: "1.3.2"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hubble-timescape-ingester
+      app.kubernetes.io/instance: hubble-timescape-ingester-hubble-timescape
+      app.kubernetes.io/component: ingester
+      app.kubernetes.io/part-of: hubble-timescape
+  template:
+    metadata:
+      annotations:
+        hubble-timescape-ingester-configmap-checksum: "a40e5da2c159e549b9a61c74c314b01db8a49b126c712464a1762438fecccc9a"
+      labels:
+        app.kubernetes.io/name: hubble-timescape-ingester
+        app.kubernetes.io/instance: hubble-timescape-ingester-hubble-timescape
+        app.kubernetes.io/component: ingester
+        app.kubernetes.io/part-of: hubble-timescape
+    spec:
+      serviceAccountName: "hubble-timescape-ingester"
+      securityContext:
+        fsGroup: 65532
+      priorityClassName: 
+      initContainers:
+        - name: migrate
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 65532
+            runAsNonRoot: true
+            runAsUser: 65532
+          image: "quay.io/isovalent/hubble-timescape:v1.3.2"
+          imagePullPolicy: IfNotPresent
+          terminationMessagePolicy: FallbackToLogsOnError
+          command:
+            - /usr/bin/hubble-timescape
+            - migrate
+          env:
+            - name: HUBBLE_TIMESCAPE_CLICKHOUSE_USERNAME
+              value: "timescape_migrate"
+            - name: HUBBLE_TIMESCAPE_CLICKHOUSE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hubble-timescape-migrate-creds
+                  key: CLICKHOUSE_PASSWORD
+            - name: HUBBLE_TIMESCAPE_DSN
+              value: "clickhouse://clickhouse-hubble-timescape:9000/hubble?dial_timeout=10s"
+            - name: HUBBLE_TIMESCAPE_CLICKHOUSE_NODES_COUNT
+              value: "1"
+          resources:
+            null
+          volumeMounts:
+          - mountPath: "/etc/hubble-timescape"
+            name: migrate-config
+            readOnly: true
+          # using $clickhouseIngester because the volume is using $clickhouseIngester
+      containers:
+        - name: ingester
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 65532
+            runAsNonRoot: true
+            runAsUser: 65532
+          image: "quay.io/isovalent/hubble-timescape:v1.3.2"
+          imagePullPolicy: IfNotPresent
+          terminationMessagePolicy: FallbackToLogsOnError
+          command:
+            - /usr/bin/hubble-timescape
+            - ingest
+          envFrom:
+            # needed for blob storage credentials env-vars
+            - secretRef:
+                name: hubble-timescape-ingester-creds
+          env:
+            - name: HUBBLE_TIMESCAPE_CLICKHOUSE_USERNAME
+              value: "timescape_ingester"
+            - name: HUBBLE_TIMESCAPE_CLICKHOUSE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hubble-timescape-ingester-creds
+                  key: CLICKHOUSE_PASSWORD
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /var/lib/hubble-timescape/secrets/google-credentials.json
+            - name: HUBBLE_TIMESCAPE_DSN
+              value: "clickhouse://clickhouse-hubble-timescape:9000/hubble?dial_timeout=10s"
+          readinessProbe:
+            exec:
+              command:
+                - /usr/bin/grpc_health_probe
+                - -addr=localhost:8080
+          resources:
+            {}
+          ports:
+          - name: ingest-metrics
+            containerPort: 9090
+            protocol: TCP
+          volumeMounts:
+          - mountPath: "/etc/hubble-timescape"
+            name: ingester-config
+            readOnly: true
+          
+          - mountPath: "/var/lib/hubble-timescape/secrets"
+            name: ingester-secret
+            readOnly: true
+      volumes:
+      - configMap:
+          name: hubble-timescape-migrate-config
+          items:
+          - key: config.yaml
+            path: config.yaml
+        name: migrate-config
+      - configMap:
+          name: hubble-timescape-ingester-config
+          items:
+          - key: config.yaml
+            path: config.yaml
+        name: ingester-config
+      
+      
+      - secret:
+          secretName: hubble-timescape-ingester-creds
+        name: ingester-secret
+---
+# Source: hubble-timescape/templates/server_deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hubble-timescape-server
+  namespace: hubble-timescape
+  labels:
+    helm.sh/chart: hubble-timescape-1.3.2
+    app.kubernetes.io/name: hubble-timescape-server
+    app.kubernetes.io/instance: hubble-timescape-server-hubble-timescape
+    app.kubernetes.io/component: server
+    app.kubernetes.io/part-of: hubble-timescape
+    app.kubernetes.io/version: "1.3.2"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hubble-timescape-server
+      app.kubernetes.io/instance: hubble-timescape-server-hubble-timescape
+      app.kubernetes.io/component: server
+      app.kubernetes.io/part-of: hubble-timescape
+  template:
+    metadata:
+      annotations:
+        hubble-timescape-server-configmap-checksum: "811a302bd7019473c6a50d5622419e2817ae256979541deb05d5cd4f3521b873"
+      labels:
+        app.kubernetes.io/name: hubble-timescape-server
+        app.kubernetes.io/instance: hubble-timescape-server-hubble-timescape
+        app.kubernetes.io/component: server
+        app.kubernetes.io/part-of: hubble-timescape
+    spec:
+      serviceAccountName: "hubble-timescape-server"
+      securityContext:
+        fsGroup: 65532
+      priorityClassName: 
+      containers:
+        - name: server
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 65532
+            runAsNonRoot: true
+            runAsUser: 65532
+          image: "quay.io/isovalent/hubble-timescape:v1.3.2"
+          imagePullPolicy: IfNotPresent
+          terminationMessagePolicy: FallbackToLogsOnError
+          command:
+            - /usr/bin/hubble-timescape
+          args:
+            - serve
+          env:
+            - name: HUBBLE_TIMESCAPE_CLICKHOUSE_USERNAME
+              value: "timescape_server"
+            - name: HUBBLE_TIMESCAPE_CLICKHOUSE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hubble-timescape-server-creds
+                  key: CLICKHOUSE_PASSWORD
+            - name: HUBBLE_TIMESCAPE_DSN
+              value: "clickhouse://clickhouse-hubble-timescape:9000/hubble?dial_timeout=10s"
+          ports:
+            - name: server-grpc
+              containerPort: 4244
+              protocol: TCP
+            - name: server-metrics
+              containerPort: 9090
+              protocol: TCP
+          startupProbe:
+            exec:
+              command:
+              - /usr/bin/grpc_health_probe
+              - -addr=localhost:4244
+        
+            # The Timescape server implement a retry logic to connect to
+            # ClickHouse with a timeout of 10s retrying 30 times before giving
+            # up and crashing. Thus, it is expected to exit on its own after 5
+            # minutes if it can't be ready. Since the default k8s periodSeconds
+            # is 10s, a failureThreshold of 32 leave to the container a little
+            # over 5m. See https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#when-should-you-use-a-startup-probe
+            failureThreshold: 32
+          readinessProbe:
+            exec:
+              command:
+              - /usr/bin/grpc_health_probe
+              - -addr=localhost:4244
+          livenessProbe:
+            exec:
+              command:
+              - /usr/bin/grpc_health_probe
+              - -addr=localhost:4244
+          # NOTE: the following postStart command is a trick to prevent the
+          # rbac container to be started before the server container is ready.
+          # Without it, the rbac container will start "early" and initialize a
+          # connection in an invalid state to the server (because the server is
+          # not ready). Then, attempting a query will result in this error:
+          #    rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing dial tcp 127.0.0.1:4244: connect: connection refused"
+          # Eventually, rbac would re-connect but the postStart trick helps to
+          # ensure a consistent behavior and avoid flaky tests.
+          # See https://medium.com/@marko.luksa/delaying-application-start-until-sidecar-is-ready-2ec2d21a7b74
+          #
+          # postStart is executed immediately after a container is created. So
+          # we want the same 5min timeout we have for the startupProbe.
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                - /usr/bin/grpc_health_probe
+                - -addr=localhost:4244
+                - -connect-timeout=5m
+                - -rpc-timeout=1m
+          resources:
+            {}
+          volumeMounts:
+          - mountPath: "/etc/hubble-timescape"
+            name: server-config
+            readOnly: true
+      volumes:
+      - name: server-config
+        configMap:
+          name: hubble-timescape-server-config
+          items:
+          - key: config.yaml
+            path: config.yaml
+---
+# Source: hubble-timescape/templates/clickhouse_installation_altinity.yaml
+apiVersion: "clickhouse.altinity.com/v1"
+kind: "ClickHouseInstallation"
+metadata:
+  name: "hubble-timescape"
+  namespace: hubble-timescape
+  labels:
+    # clickhouse-operator will also add its own set of labels
+    helm.sh/chart: hubble-timescape-1.3.2
+    app.kubernetes.io/name: hubble-timescape-clickhouse
+    app.kubernetes.io/instance: hubble-timescape-clickhouse-hubble-timescape
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: hubble-timescape
+    app.kubernetes.io/version: "1.3.2"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  defaults:
+    templates:
+      podTemplate: pod-template
+      serviceTemplate: svc-template
+  configuration:
+    files:
+    clusters:
+    - name: "hubble-data"
+      layout:
+        shardsCount: 1
+        shards:
+          null
+    settings:
+      logger/level: information
+      max_concurrent_queries: 100
+      max_connections: 4096
+      query_log/engine: |
+        Engine = MergeTree PARTITION BY event_date ORDER BY event_time TTL event_date + INTERVAL 3 day
+      max_table_size_to_drop: 0
+      prometheus/endpoint: /metrics
+      prometheus/port: 8001
+      prometheus/metrics: true
+      prometheus/events: true
+      prometheus/asynchronous_metrics: true
+      mysql_port: _removed_
+      postgresql_port: _removed_
+
+      # client TLS settings
+      # needed for ClickHouse to use public services, eg: S3
+      openSSL/client/loadDefaultCAFile: true
+
+      openSSL/client/cacheSessions: true
+      openSSL/client/disableProtocols: "sslv2,sslv3,tlsv1,tlsv1_1,tlsv1_2"
+      openSSL/client/preferServerCiphers: true
+      # strict verifies the server cert when configured on the client
+      openSSL/client/verificationMode: "strict"
+      openSSL/client/invalidCertificateHandler/name: RejectCertificateHandler
+
+      # Work around system tables requiring grants.
+      # TODO: Use roles and assign grants explicitly like we do with ClickHouse cloud, instead of relying only on the profile settings.
+      # https://github.com/ClickHouse/ClickHouse/pull/38970
+      access_control_improvements/select_from_system_db_requires_grant: false
+      # Probably needed to ON CLUSTER queries.
+      access_control_improvements/on_cluster_queries_require_cluster_grant: false
+    profiles:
+      timescape_admin_role/readonly: 0      # allow all queries       (SELECT, SHOW, DESCRIBE, EXISTS, INSERT, OPTIMIZE, SET, USE)
+      timescape_admin_role/allow_ddl: 1     # allow DDL queries       (CREATE, ALTER, RENAME, ATTACH, DETACH, DROP, TRUNCATE)
+      timescape_admin_role/log_queries: 1
+      timescape_admin_role/skip_unavailable_shards: 1
+      timescape_admin_role/prefer_global_in_and_join: 1
+      # disable the query profiler due to us hitting https://github.com/ClickHouse/ClickHouse/issues/15638 on some arm64 hosts
+      timescape_admin_role/query_profiler_cpu_time_period_ns: "0"
+      timescape_admin_role/query_profiler_real_time_period_ns: "0"
+      timescape_readwrite_role/readonly: 0  # allow all queries       (SELECT, SHOW, DESCRIBE, EXISTS, INSERT, OPTIMIZE, SET, USE)
+      timescape_readwrite_role/allow_ddl: 0 # disallow DDL queries    (CREATE, ALTER, RENAME, ATTACH, DETACH, DROP, TRUNCATE)
+      timescape_readwrite_role/log_queries: 1
+      timescape_readwrite_role/skip_unavailable_shards: 1
+      # disable the query profiler due to us hitting https://github.com/ClickHouse/ClickHouse/issues/15638 on some arm64 hosts
+      timescape_readwrite_role/query_profiler_cpu_time_period_ns: "0"
+      timescape_readwrite_role/query_profiler_real_time_period_ns: "0"
+      timescape_readwrite_role/prefer_global_in_and_join: 1
+      timescape_readonly_role/readonly: 2   # allow read queries only (SELECT, SHOW, DESCRIBE, EXISTS) and SET SETTINGS
+      timescape_readonly_role/allow_ddl: 0  # disallow DDL queries    (CREATE, ALTER, RENAME, ATTACH, DETACH, DROP, TRUNCATE)
+      timescape_readonly_role/log_queries: 1
+      timescape_readonly_role/skip_unavailable_shards: 1
+      # disable the query profiler due to us hitting https://github.com/ClickHouse/ClickHouse/issues/15638 on some arm64 hosts
+      timescape_readonly_role/query_profiler_cpu_time_period_ns: "0"
+      timescape_readonly_role/query_profiler_real_time_period_ns: "0"
+      timescape_readonly_role/prefer_global_in_and_join: 1
+      timescape_trimmer_role/readonly: 0      # allow all queries       (SELECT, SHOW, DESCRIBE, EXISTS, INSERT, OPTIMIZE, SET, USE)
+      timescape_trimmer_role/allow_ddl: 1     # allow DDL queries       (CREATE, ALTER, RENAME, ATTACH, DETACH, DROP, TRUNCATE)
+      timescape_trimmer_role/log_queries: 1
+      timescape_trimmer_role/skip_unavailable_shards: 1
+      timescape_trimmer_role/prefer_global_in_and_join: 1
+      # disable the query profiler due to us hitting https://github.com/ClickHouse/ClickHouse/issues/15638 on some arm64 hosts
+      timescape_trimmer_role/query_profiler_cpu_time_period_ns: "0"
+      timescape_trimmer_role/query_profiler_real_time_period_ns: "0"
+    users:
+      timescape_migrate/k8s_secret_password: hubble-timescape/hubble-timescape-migrate-creds/CLICKHOUSE_PASSWORD
+      timescape_migrate/profile: timescape_admin_role
+      timescape_migrate/quota: default
+      timescape_migrate/networks/ip:
+        - "::/0"
+      timescape_migrate/allow_databases/database:
+        - "hubble"
+      timescape_ingester/k8s_secret_password: hubble-timescape/hubble-timescape-ingester-creds/CLICKHOUSE_PASSWORD
+      timescape_ingester/profile: timescape_readwrite_role
+      timescape_ingester/quota: default
+      timescape_ingester/networks/ip:
+        - "::/0"
+      timescape_ingester/allow_databases/database:
+        - "hubble"
+      timescape_trimmer/k8s_secret_password: hubble-timescape/hubble-timescape-trimmer-creds/CLICKHOUSE_PASSWORD
+      timescape_trimmer/profile: timescape_trimmer_role
+      timescape_trimmer/quota: default
+      timescape_trimmer/networks/ip:
+        - "::/0"
+      timescape_trimmer/allow_databases/database:
+        - "hubble"
+      timescape_server/k8s_secret_password: hubble-timescape/hubble-timescape-server-creds/CLICKHOUSE_PASSWORD
+      timescape_server/profile: timescape_readonly_role
+      timescape_server/quota: default
+      timescape_server/networks/ip:
+        - "::/0"
+      timescape_server/allow_databases/database:
+        - "hubble"
+  templates:
+    podTemplates:
+    - name: pod-template
+      metadata:
+        labels:
+          # clickhouse-operator will also add its own set of labels
+          helm.sh/chart: hubble-timescape-1.3.2
+          app.kubernetes.io/name: hubble-timescape-clickhouse
+          app.kubernetes.io/instance: hubble-timescape-clickhouse-hubble-timescape
+          app.kubernetes.io/component: database
+          app.kubernetes.io/part-of: hubble-timescape
+          app.kubernetes.io/version: "1.3.2"
+          app.kubernetes.io/managed-by: Helm
+        annotations:
+          {}
+      spec:
+        priorityClassName: 
+        affinity:
+          podAntiAffinity:
+            # never schedule on a node running AIO clickhouse to prevent accidentally mounting a PV twice
+            requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: hubble-timescape-aio-clickhouse
+                  operator: Exists
+              topologyKey: kubernetes.io/hostname
+        containers:
+          - name: clickhouse
+            image: "docker.io/clickhouse/clickhouse-server:23.8.15.35-alpine@sha256:b25e08fbe0ab968451ccd790afdb21bdfe64e34de4c32199e0adcafe73e95445"
+            imagePullPolicy: IfNotPresent
+            terminationMessagePolicy: FallbackToLogsOnError
+            resources:
+              {}
+            volumeMounts:
+              - name: data-storage-template
+                mountPath: /var/lib/clickhouse
+            env:
+            readinessProbe:
+              httpGet:
+                path: /ping
+                port: http
+                scheme: HTTP
+            livenessProbe:
+              httpGet:
+                path: /ping
+                port: http
+                scheme: HTTP
+              initialDelaySeconds: 60
+              periodSeconds: 3
+            ports:
+            - containerPort: 9000
+              name: tcp
+              protocol: TCP
+            - containerPort: 8123
+              name: http
+              protocol: TCP
+            - containerPort: 9009
+              name: interserver
+              protocol: TCP
+            - containerPort: 8001
+              name: metrics
+              protocol: TCP
+        securityContext:
+          # clickhouse GID is 101, and mounted files need to has the correct
+          # permissions for clickhouse to read them
+          fsGroup: 101
+        volumes:
+    serviceTemplates:
+      - name: svc-template
+        generateName: "clickhouse-{chi}"
+        metadata:
+          labels:
+            # clickhouse-operator will also add its own set of labels
+            metrics-service: 'true'
+            helm.sh/chart: hubble-timescape-1.3.2
+            app.kubernetes.io/name: hubble-timescape-clickhouse
+            app.kubernetes.io/instance: hubble-timescape-clickhouse-hubble-timescape
+            app.kubernetes.io/component: database
+            app.kubernetes.io/part-of: hubble-timescape
+            app.kubernetes.io/version: "1.3.2"
+            app.kubernetes.io/managed-by: Helm
+        spec:
+          ports:
+            - name: http
+              port: 8123
+            - name: tcp
+              port: 9000
+            - name: metrics
+              port: 8001
+          type: ClusterIP  # Avoid exposing the ClickHouse installation to outside.
+    volumeClaimTemplates:
+    - name: data-storage-template
+      reclaimPolicy: Retain
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName:

@@ -1,0 +1,23 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  annotations:
+    meta.helm.sh/release-name: jobs-app
+    meta.helm.sh/release-namespace: tenant-jobs
+  creationTimestamp: "2024-08-05T17:10:30Z"
+  generation: 1
+  labels:
+    app.kubernetes.io/managed-by: Helm
+  name: allow-all-within-namespace
+  namespace: tenant-jobs
+  resourceVersion: "5664"
+  uid: bd735468-3001-4486-a030-6f74784ef249
+spec:
+  description: Allow all within namespace
+  egress:
+  - toEndpoints:
+    - {}
+  endpointSelector: {}
+  ingress:
+  - fromEndpoints:
+    - {}

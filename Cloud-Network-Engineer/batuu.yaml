@@ -1,0 +1,125 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: batuu
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: deathstar
+  name: deathstar
+  namespace: batuu
+  labels:
+    org: empire
+spec:
+  type: LoadBalancer
+  ipFamilyPolicy: RequireDualStack
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    org: empire
+    class: deathstar
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deathstar
+  namespace: batuu
+  labels:
+    app.kubernetes.io/name: deathstar
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      org: empire
+      class: deathstar
+  template:
+    metadata:
+      labels:
+        org: empire
+        class: deathstar
+        app.kubernetes.io/name: deathstar
+    spec:
+      containers:
+      - name: deathstar
+        image: docker.io/cilium/starwars
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: batuu
+  name: tiefighter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      org: empire
+      class: tiefighter
+      app.kubernetes.io/name: tiefighter
+  template:
+    metadata:
+      labels:
+        org: empire
+        class: tiefighter
+        app.kubernetes.io/name: tiefighter
+    spec:
+      containers:
+        - name: starship
+          image: docker.io/tgraf/netperf
+          command: ["/bin/sh"]
+          args: ["-c", "while true; do curl -s -6 -XPOST deathstar.batuu.svc.cluster.local/v1/request-landing; curl -s 10.0.4.2; sleep 1; done"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: batuu
+  name: tiefighter-4
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      org: empire
+      class: tiefighter-4
+      app.kubernetes.io/name: tiefighter-4
+  template:
+    metadata:
+      labels:
+        org: empire
+        class: tiefighter-4
+        app.kubernetes.io/name: tiefighter-4
+    spec:
+      containers:
+        - name: starship
+          image: docker.io/tgraf/netperf
+          command: ["/bin/sh"]
+          args: ["-c", "while true; do curl -s -4 -XPOST deathstar.batuu.svc.cluster.local/v1/request-landing; curl -s 10.0.4.2; sleep 1; done"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: batuu
+  name: xwing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      org: alliance
+      class: xwing
+      app.kubernetes.io/name: xwing
+  template:
+    metadata:
+      labels:
+        org: alliance
+        class: xwing
+        app.kubernetes.io/name: xwing
+    spec:
+      containers:
+        - name: starship
+          image: docker.io/tgraf/netperf
+          command: ["/bin/sh"]
+          args: ["-c", "while true; do curl -s -XPOST deathstar.batuu.svc.cluster.local/v1/request-landing; curl -s 10.0.0.2; sleep 1; done"]

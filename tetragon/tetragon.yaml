@@ -1,0 +1,10 @@
+tetragon:
+  btf: /sys/kernel/btf/vmlinux
+  enableCiliumAPI: false
+  exportAllowList: ""
+  exportDenyList: ""
+  exportFilename: "tetragon.log"
+  enableProcessCred: true
+  enableProcessNs: true
+tetragonOperator:
+  enabled: true

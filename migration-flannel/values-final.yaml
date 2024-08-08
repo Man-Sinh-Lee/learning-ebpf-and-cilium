@@ -1,0 +1,21 @@
+bpf:
+  hostLegacyRouting: true
+cluster:
+  name: kind-kind
+cni:
+  customConf: false
+  uninstall: false
+ipam:
+  mode: cluster-pool
+  operator:
+    clusterPoolIPv4PodCIDRList:
+    - 10.245.0.0/16
+operator:
+  replicas: 1
+  unmanagedPodWatcher:
+    restart: true
+policyEnforcementMode: default
+routingMode: tunnel
+tunnel: vxlan
+tunnelPort: 8473
+tunnelProtocol: vxlan

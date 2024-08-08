@@ -1,0 +1,38 @@
+apiVersion: kind.x-k8s.io/v1alpha4
+kind: Cluster
+networking:
+  ipFamily: dual
+  disableDefaultCNI: true
+  kubeProxyMode: none
+  podSubnet: "10.1.0.0/16,fd00:10:1::/60"
+  serviceSubnet: "10.2.0.0/16,fd00:10:2::/108"
+nodes:
+- role: control-plane
+  extraPortMappings:
+  # Hubble relay
+  - containerPort: 31234
+    hostPort: 31234
+  # Hubble UI
+  - containerPort: 31235
+    hostPort: 31235
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-ip: "10.0.1.2,fd00:10:0:1::2"
+- role: worker
+  kubeadmConfigPatches:
+  - |
+    kind: JoinConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-ip: "10.0.2.2,fd00:10:0:2::2"
+# Egress GW
+- role: worker
+  kubeadmConfigPatches:
+  - |
+    kind: JoinConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-ip: "10.0.3.2,fd00:10:0:3::2"

@@ -1,0 +1,16 @@
+apiVersion: cilium.io/v2
+kind: CiliumEgressGatewayPolicy
+metadata:
+  name: millenium-falcon
+spec:
+  destinationCIDRs:
+  - "172.18.0.0/16"
+  selectors:
+  - podSelector:
+      matchLabels:
+        class: millenium-falcon
+  egressGateway:
+    nodeSelector:
+      matchLabels:
+        egress-gw: 'true'
+    egressIP: 172.18.0.42

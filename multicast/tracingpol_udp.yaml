@@ -1,0 +1,14 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: udp-parser
+spec:
+  parser:
+   udp:
+    #  burst:
+    #    enable: true
+    #    triggerPercent: 50
+    #    windowSize: 1000
+     cgroup: true
+     enable: true
+     statsInterval: 20

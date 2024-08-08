@@ -1,0 +1,54 @@
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumBGPPeeringPolicy
+metadata:
+  name: control-plane
+spec:
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/hostname: kind-control-plane
+  virtualRouters:
+  - localASN: 65001
+    exportPodCIDR: true
+    serviceSelector:
+     matchLabels:
+       announced: bgp
+    neighbors:
+    - peerASN: 65000
+      peerAddress: fd00:10:0:1::1/128
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumBGPPeeringPolicy
+metadata:
+  name: worker
+spec:
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/hostname: kind-worker
+  virtualRouters:
+  - localASN: 65002
+    exportPodCIDR: true
+    serviceSelector:
+     matchLabels:
+       announced: bgp
+    neighbors:
+    - peerASN: 65000
+      peerAddress: fd00:10:0:2::1/128
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumBGPPeeringPolicy
+metadata:
+  name: worker2
+spec:
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/hostname: kind-worker2
+  virtualRouters:
+  - localASN: 65003
+    exportPodCIDR: true
+    serviceSelector:
+     matchLabels:
+       announced: bgp
+    neighbors:
+    - peerASN: 65000
+      peerAddress: fd00:10:0:3::1/128

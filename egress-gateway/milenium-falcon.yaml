@@ -1,0 +1,104 @@
+piVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2024-08-07T02:08:14Z"
+  labels:
+    class: millenium-falcon
+  name: millenium-falcon
+  namespace: default
+  resourceVersion: "8300"
+  uid: d639bd02-9e74-4197-8cf7-5015ba2bb4d6
+spec:
+  containers:
+  - image: docker.io/tgraf/netperf
+    imagePullPolicy: Always
+    name: millenium-falcon
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-kh67g
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: kind-worker
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: kube-api-access-kh67g
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2024-08-07T02:08:16Z"
+    status: "True"
+    type: PodReadyToStartContainers
+  - lastProbeTime: null
+    lastTransitionTime: "2024-08-07T02:08:14Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2024-08-07T02:08:16Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2024-08-07T02:08:16Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2024-08-07T02:08:14Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: containerd://2436424cc3d37749348bcacae5fb0b9a28104de2a5808b9ee0d8731623c4d157
+    image: docker.io/tgraf/netperf:latest
+    imageID: docker.io/tgraf/netperf@sha256:8e86f744bfea165fd4ce68caa05abc96500f40130b857773186401926af7e9e6
+    lastState: {}
+    name: millenium-falcon
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2024-08-07T02:08:16Z"
+  hostIP: 172.18.0.2
+  hostIPs:
+  - ip: 172.18.0.2
+  phase: Running
+  podIP: 10.244.2.111
+  podIPs:
+  - ip: 10.244.2.111
+  qosClass: BestEffort
+  startTime: "2024-08-07T02:08:14Z"

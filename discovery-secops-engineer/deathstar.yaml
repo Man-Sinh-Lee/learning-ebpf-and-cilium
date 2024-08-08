@@ -1,0 +1,27 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: deathstar
+  namespace: endor
+spec:
+  endpointSelector:
+    matchLabels:
+      org: empire
+      class: deathstar
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:app.kubernetes.io/name: tiefighter
+            k8s:class: tiefighter
+            k8s:io.cilium.k8s.namespace.labels.kubernetes.io/metadata.name: endor
+            k8s:io.kubernetes.pod.namespace: endor
+            k8s:org: empire
+      authentication:
+        mode: "required"
+      toPorts:
+        - ports:
+            - port: "80"
+#          rules:
+#            http:
+#              - method: "POST"
+#                path: "/v1/request-landing"

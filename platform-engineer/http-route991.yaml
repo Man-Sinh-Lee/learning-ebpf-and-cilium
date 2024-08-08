@@ -1,0 +1,25 @@
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: deathstar
+  namespace: endor
+spec:
+  parentRefs:
+  - name: tls-gateway
+  hostnames:
+  - "deathstar.cilium.rocks"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - kind: Service
+      name: deathstar
+      port: 80
+      weight: 99
+    - kind: Service
+      name: deathstar2
+      port: 80
+      weight: 1
