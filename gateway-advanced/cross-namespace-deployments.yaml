@@ -1,0 +1,138 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: infra-ns
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hr
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    shared-gateway-access: "true"
+  name: product
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    shared-gateway-access: "true"
+  name: careers
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echoserver-hr
+  namespace: hr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echoserver
+  template:
+    metadata:
+      labels:
+        app: echoserver
+    spec:
+      containers:
+        - image: ealen/echo-server:latest
+          imagePullPolicy: IfNotPresent
+          name: echoserver
+          ports:
+            - containerPort: 80
+          env:
+            - name: PORT
+              value: "80"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-hr
+  namespace: hr
+spec:
+  ports:
+    - port: 9080
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app: echoserver
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echoserver-product
+  namespace: product
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echoserver
+  template:
+    metadata:
+      labels:
+        app: echoserver
+    spec:
+      containers:
+        - image: ealen/echo-server:latest
+          imagePullPolicy: IfNotPresent
+          name: echoserver
+          ports:
+            - containerPort: 80
+          env:
+            - name: PORT
+              value: "80"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-product
+  namespace: product
+spec:
+  ports:
+    - port: 9080
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app: echoserver
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echoserver-careers
+  namespace: careers
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echoserver
+  template:
+    metadata:
+      labels:
+        app: echoserver
+    spec:
+      containers:
+        - image: ealen/echo-server:latest
+          imagePullPolicy: IfNotPresent
+          name: echoserver
+          ports:
+            - containerPort: 80
+          env:
+            - name: PORT
+              value: "80"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-careers
+  namespace: careers
+spec:
+  ports:
+    - port: 9080
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app: echoserver

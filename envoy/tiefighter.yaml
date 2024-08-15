@@ -1,0 +1,23 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: tiefighter
+  namespace: default
+spec:
+  endpointSelector:
+    matchLabels:
+      org: empire
+      class: tiefighter
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            class: deathstar
+            org: empire
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+          rules:
+            http:
+            - method: POST
+              path: /v1/request-landing

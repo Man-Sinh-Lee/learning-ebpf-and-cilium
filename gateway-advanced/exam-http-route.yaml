@@ -1,0 +1,24 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: exam-httproute
+  namespace: exam
+spec:
+  parentRefs:
+    - name: shared-gateway
+      namespace: infra-ns
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /exam
+      filters:
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            set:
+              - name: x-request-id
+                value: exam-header-value
+      backendRefs:
+        - kind: Service
+          name: echo-exam
+          port: 9080

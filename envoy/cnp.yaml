@@ -1,0 +1,23 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: empire-to-deathstar
+  namespace: exam
+spec:
+  endpointSelector:
+    matchLabels:
+      org: empire
+  egress:
+    - toEndpoints:
+        - matchExpressions:
+            - {key: org, operator: In, values: ["empire"]}
+            - {key: class, operator: In, values: ["deathstar", "darkstar"]}
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+          listener:
+            envoyConfig:
+              kind: "CiliumEnvoyConfig"
+              name: "deathstar-lb"
+            name: "lb-listener"
